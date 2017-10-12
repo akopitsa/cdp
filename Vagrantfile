@@ -1,5 +1,7 @@
 $hostnamepuppetserver = "xpuakhaw0014t3.kyiv.epam.com"
 $ipaddresspuppetserver = "192.168.99.103"
+$hostnamepuppetagent = "xpuakhaw0014t4.kyiv.epam.com"
+$ipaddresspuppetagent = "192.168.99.104"
 Vagrant.configure(2) do |config|
   config.vm.box = "centos/7"
   config.vm.synced_folder "templates", "/tmp/vagrant-puppet/templates"
@@ -17,11 +19,19 @@ Vagrant.configure(2) do |config|
     yum -y install puppetserver ntpdate
     timedatectl set-timezone Europe/Kiev
     ntpdate 0.ua.pool.ntp.org
-    puppet module install puppetlabs-ntp
     echo "*.kyiv.epam.com" >> /etc/puppetlabs/puppet/autosign.conf
-    echo "autosign = /etc/puppetlabs/puppet/autosign.conf" >> /etc/puppetlabs/puppet/puppet.conf
-    systemctl restart puppetserver
+    echo """
+dns_alt_names = #{$hostnamepuppetserver},server
+autosign = /etc/puppetlabs/puppet/autosign.conf
+[main]
+certname = #{$hostnamepuppetserver}
+server = #{$hostnamepuppetserver}
+environment = production
+runinterval = 2m
+""" >> /etc/puppetlabs/puppet/puppet.conf
+    systemctl start puppetserver
     systemctl enable puppetserver
+    puppet module install puppetlabs-ntp
   SHELL
 #  ntp.vm.synced_folder ".", "/etc/puppetlabs/modules"
   puppetserver.vm.provision :puppet do |puppet|
@@ -37,8 +47,8 @@ Vagrant.configure(2) do |config|
   end
   ###################################################
   config.vm.define "puppetagent" do |puppetagent|
-    puppetagent.vm.hostname = "xpuakhaw0014t4.kyiv.epam.com"
-    puppetagent.vm.network "private_network", ip: "192.168.99.104"
+    puppetagent.vm.hostname = $hostnamepuppetagent
+    puppetagent.vm.network "private_network", ip: $ipaddresspuppetagent
     puppetagent.vm.provider :virtualbox do |agent|
       agent.name = "PuppetAgent1"
       agent.memory = 1024
@@ -61,7 +71,7 @@ Vagrant.configure(2) do |config|
 certname = #{puppetagent.vm.hostname}
 server = #{$hostnamepuppetserver}
 environment = production
-runinterval = 1h
+runinterval = 2m
 """ >> /etc/puppetlabs/puppet/puppet.conf
       fi
       /opt/puppetlabs/bin/puppet resource service puppet ensure=running enable=true
