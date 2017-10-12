@@ -36,10 +36,10 @@ server = #{$hostnamepuppetserver}
 environment = production
 runinterval = 2m
 """ >> /etc/puppetlabs/puppet/puppet.conf
-    systemctl start puppetserver
-    systemctl enable puppetserver
-    puppet module install puppetlabs-ntp
-  SHELL
+systemctl start puppetserver
+systemctl enable puppetserver
+/opt/puppetlabs/bin/puppet module install puppetlabs-ntp --version 6.3.0
+SHELL
 #  ntp.vm.synced_folder ".", "/etc/puppetlabs/modules"
   puppetserver.vm.provision :puppet do |puppet|
     puppet.manifests_path = "manifests"
@@ -83,6 +83,6 @@ runinterval = 2m
       fi
       /opt/puppetlabs/bin/puppet resource service puppet ensure=running enable=true
 #      /opt/puppetlabs/bin/puppet agent --test
-    SHELL
+SHELL
   end
 end
