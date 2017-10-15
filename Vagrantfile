@@ -1,9 +1,9 @@
-require 'puppet'
-require 'vagrant-env'
-require 'vagrant-hostmanager'
-require 'vagrant-puppet-install'
-require 'vagrant-share'
-require 'vagrant-vbguest'
+#require 'puppet'
+#require 'vagrant-env'
+#require 'vagrant-hostmanager'
+#require 'vagrant-puppet-install'
+#require 'vagrant-share'
+#require 'vagrant-vbguest'
 
 $hostnamepuppetserver = "xpuakhaw0014t3.kyiv.epam.com"
 $ipaddresspuppetserver = "192.168.99.103"
